@@ -1,0 +1,56 @@
+import { openproviders } from "@/lib/openproviders"
+import { ModelConfig } from "../types"
+
+const claudeModels: ModelConfig[] = [
+  {
+    id: "claude-4-opus",
+    name: "Claude 4 Opus",
+    provider: "Anthropic",
+    providerId: "anthropic",
+    modelFamily: "Claude 4",
+    baseProviderId: "claude",
+    description:
+      "Preview of the upcoming Claude 4 Opus model with enhanced reasoning.",
+    tags: ["preview", "next-gen", "reasoning", "advanced"],
+    contextWindow: 500000,
+    inputCost: 25.0,
+    outputCost: 125.0,
+    priceUnit: "per 1M tokens",
+    vision: true,
+    tools: true,
+    audio: true,
+    reasoning: true,
+    openSource: false,
+    speed: "Medium",
+    intelligence: "High",
+    website: "https://www.anthropic.com",
+    apiDocs: "https://docs.anthropic.com",
+    icon: "claude",
+  },
+  {
+    id: "claude-4-sonnet",
+    name: "Claude 4 Sonnet",
+    provider: "Anthropic",
+    providerId: "anthropic",
+    modelFamily: "Claude 4",
+    baseProviderId: "claude",
+    description: "Sonnet variant of the Claude 4 model family.",
+    tags: ["next-gen", "balanced", "preview"],
+    contextWindow: 500000,
+    inputCost: 5.0,
+    outputCost: 25.0,
+    priceUnit: "per 1M tokens",
+    vision: true,
+    tools: true,
+    audio: true,
+    reasoning: true,
+    openSource: false,
+    speed: "Medium",
+    intelligence: "High",
+    website: "https://www.anthropic.com",
+    apiDocs: "https://docs.anthropic.com",
+    icon: "claude",
+  },
+]
+
+export { claudeModels }
