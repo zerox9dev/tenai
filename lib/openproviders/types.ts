@@ -34,6 +34,10 @@ export type OpenAIModel =
   | "gpt-4.5-preview"
   | "gpt-4.5-preview-2025-02-27"
   | "chatgpt-4o-latest"
+  | "o3"
+  | "o3-2025-04-16"
+  | "o4-mini"
+  | "o4-mini-2025-04-16"
 
 
 

@@ -76,7 +76,7 @@ export async function GET() {
   const { data: authData } = await supabase.auth.getUser()
 
   const userId = authData?.user?.id
-  if (!userId)
+  if (!userId || !authData.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // Check if this is an anonymous user

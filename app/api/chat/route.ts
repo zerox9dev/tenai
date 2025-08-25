@@ -1,6 +1,7 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
+import type { SupportedModel } from "@/lib/openproviders/types"
 import type { Provider } from "@/lib/user-keys"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
@@ -18,7 +19,7 @@ type ChatRequest = {
   messages: MessageAISDK[]
   chatId: string
   userId: string
-  model: string
+  model: SupportedModel
   isAuthenticated: boolean
   systemPrompt: string
   enableSearch: boolean
