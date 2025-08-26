@@ -8,17 +8,7 @@ const MODEL_PROVIDER_MAP: Record<string, Provider> = {
   // Anthropic
 
   // XAI
-  "grok-2-vision-1212": "xai",
-  "grok-2-vision": "xai",
-  "grok-2-vision-latest": "xai",
-  "grok-2-image-1212": "xai",
-  "grok-2-image": "xai",
-  "grok-2-image-latest": "xai",
-  "grok-2-1212": "xai",
-  "grok-2": "xai",
-  "grok-2-latest": "xai",
-  "grok-vision-beta": "xai",
-  "grok-beta": "xai",
+  "grok-4-latest": "xai",
 }
 
 export function getProviderForModel(model: SupportedModel): Provider {

@@ -2,7 +2,7 @@ import { LanguageModelV1 } from "ai"
 
 type ModelConfig = {
   id: string // "gpt-5-nano" // same from AI SDKs
-  name: string // "GPT-4.1 Nano"
+  name: string // "GPT-5 Nano"
   provider: string // "OpenAI", "Mistral", etc.
   providerId: string // "openai", "mistral", etc.
   modelFamily?: string // "GPT-4", "Claude 3", etc.

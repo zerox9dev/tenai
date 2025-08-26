@@ -5,21 +5,10 @@ export type OpenAIModel =
 export type AnthropicModel = never
 
 export type XaiModel =
-  | "grok-2-vision-1212"
-  | "grok-2-vision"
-  | "grok-2-vision-latest"
-  | "grok-2-image-1212"
-  | "grok-2-image"
-  | "grok-2-image-latest"
-  | "grok-2-1212"
-  | "grok-2"
-  | "grok-2-latest"
-  | "grok-vision-beta"
-  | "grok-beta"
+  | "grok-4-latest"
 
 export type OpenRouterModel =
-  | "openrouter:openai/gpt-5"
-  | "openrouter:openai/gpt-5-nano"
+  | "openrouter:openai/gpt-oss-20b:free"
 
 export type Provider =
   | "openai"
