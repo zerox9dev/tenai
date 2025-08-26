@@ -445,7 +445,7 @@ docker build -t zola .
 docker run -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key \
-  -e SUPABASE_SERVICE_ROLE=your_supabase_service_role_key \
+  -e NEXT_PUBLIC_SUPABASE_SERVICE_ROLE=your_supabase_service_role_key \
   -e OPENAI_API_KEY=your_openai_api_key \
   -e MISTRAL_API_KEY=your_mistral_api_key \
   zola
@@ -469,7 +469,7 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE=${SUPABASE_SERVICE_ROLE}
+      - NEXT_PUBLIC_SUPABASE_SERVICE_ROLE=${NEXT_PUBLIC_SUPABASE_SERVICE_ROLE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
     restart: unless-stopped

@@ -158,7 +158,7 @@ jobs:
   #         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
   #         NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
   #         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-  #         SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+  #         NEXT_PUBLIC_SUPABASE_SERVICE_ROLE: ${{ secrets.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE }}
   #         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   #         MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
   #         CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
