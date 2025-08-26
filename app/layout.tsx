@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -76,6 +77,7 @@ export default async function RootLayout({
                           <Toaster position="top-center" />
                           {children}
                         </SidebarProvider>
+                        <Analytics />
                       </ThemeProvider>
                     </TooltipProvider>
                   </UserPreferencesProvider>
