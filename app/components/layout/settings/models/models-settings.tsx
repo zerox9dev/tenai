@@ -1,6 +1,6 @@
 "use client"
 
-import { useModel } from "@/lib/model-store/provider"
+import { useModels } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -19,7 +19,8 @@ type FavoriteModelItem = ModelConfig & {
 }
 
 export function ModelsSettings() {
-  const { models } = useModel()
+  const { data: modelsData } = useModels()
+  const models = useMemo(() => modelsData?.models || [], [modelsData?.models])
   const { isModelHidden } = useUserPreferences()
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -38,7 +39,7 @@ export function ModelsSettings() {
 
     return currentFavoriteModels
       .map((id: string) => {
-        const model = models.find((m) => m.id === id)
+        const model = models.find((m: ModelConfig) => m.id === id)
         if (!model || isModelHidden(model.id)) return null
         return { ...model, isFavorite: true }
       })
@@ -53,15 +54,15 @@ export function ModelsSettings() {
 
     const availableModels = models
       .filter(
-        (model) =>
+        (model: ModelConfig) =>
           !currentFavoriteModels.includes(model.id) && !isModelHidden(model.id)
       )
-      .filter((model) =>
+      .filter((model: ModelConfig) =>
         model.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
 
     return availableModels.reduce(
-      (acc, model) => {
+      (acc: Record<string, ModelConfig[]>, model: ModelConfig) => {
         const iconKey = model.icon || "unknown"
 
         if (!acc[iconKey]) {
@@ -72,7 +73,7 @@ export function ModelsSettings() {
 
         return acc
       },
-      {} as Record<string, typeof models>
+      {} as Record<string, ModelConfig[]>
     )
   }, [models, currentFavoriteModels, isModelHidden, searchQuery])
 
@@ -226,7 +227,8 @@ export function ModelsSettings() {
         <div className="space-y-6 pb-6">
           {Object.entries(availableModelsByProvider).map(
             ([iconKey, modelsGroup]) => {
-              const firstModel = modelsGroup[0]
+              const typedModelsGroup = modelsGroup as ModelConfig[]
+              const firstModel = typedModelsGroup[0]
               const provider = PROVIDERS.find((p) => p.id === firstModel.icon)
 
               return (
@@ -235,12 +237,12 @@ export function ModelsSettings() {
                     {provider?.icon && <provider.icon className="size-5" />}
                     <h4 className="font-medium">{provider?.name || iconKey}</h4>
                     <span className="text-muted-foreground text-sm">
-                      ({modelsGroup.length} models)
+                      ({typedModelsGroup.length} models)
                     </span>
                   </div>
 
                   <div className="space-y-2 pl-7">
-                    {modelsGroup.map((model) => {
+                    {typedModelsGroup.map((model: ModelConfig) => {
                       const modelProvider = PROVIDERS.find(
                         (p) => p.id === model.provider
                       )

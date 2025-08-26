@@ -10,7 +10,7 @@ import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel, incrementUsage } from "@/lib/usage"
-import { getUserKey } from "@/lib/user-keys"
+
 
 export async function validateAndTrackUsage({
   userId,

@@ -7,7 +7,8 @@ import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
-import { useModel } from "@/lib/model-store/provider"
+import { useModels } from "@/lib/fetch"
+import { ModelConfig } from "@/lib/models/types"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
@@ -37,14 +38,15 @@ export function MultiChat() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { user } = useUser()
-  const { models } = useModel()
+  const { data: modelsData } = useModels()
+  const models = useMemo(() => modelsData?.models || [], [modelsData?.models])
   const { chatId } = useChatSession()
   const { messages: persistedMessages, isLoading: messagesLoading } =
     useMessages()
   const { createNewChat } = useChats()
 
   const availableModels = useMemo(() => {
-    return models.map((model) => ({
+    return models.map((model: ModelConfig) => ({ 
       id: model.id,
       name: model.name,
       provider: model.provider,
@@ -53,8 +55,9 @@ export function MultiChat() {
 
   const modelsFromPersisted = useMemo(() => {
     return persistedMessages
-      .filter((msg) => (msg as any).model)
-      .map((msg) => (msg as any).model)
+      .filter((msg) => 'model' in msg && msg.model)
+      .map((msg) => 'model' in msg ? (msg as { model: string }).model : '')
+      .filter(Boolean)
   }, [persistedMessages])
 
   const modelsFromLastGroup = useMemo(() => {
@@ -68,8 +71,8 @@ export function MultiChat() {
     for (let i = lastUserIndex + 1; i < persistedMessages.length; i++) {
       const msg = persistedMessages[i]
       if (msg.role === "user") break
-      if (msg.role === "assistant" && (msg as any).model) {
-        modelsInLastGroup.push((msg as any).model)
+      if (msg.role === "assistant" && 'model' in msg && msg.model) {
+        modelsInLastGroup.push((msg as { model: string }).model)
       }
     }
     return modelsInLastGroup
@@ -77,7 +80,7 @@ export function MultiChat() {
 
   const allModelsToMaintain = useMemo(() => {
     const combined = [...new Set([...selectedModelIds, ...modelsFromPersisted])]
-    return availableModels.filter((model) => combined.includes(model.id))
+    return availableModels.filter((model: { id: string }) => combined.includes(model.id))
   }, [availableModels, selectedModelIds, modelsFromPersisted])
 
   if (selectedModelIds.length === 0 && modelsFromLastGroup.length > 0) {
@@ -141,10 +144,12 @@ export function MultiChat() {
         persistedGroups[groupKey] = {
           userMessage: group.userMessage,
           responses: group.assistantMessages.map((msg, index) => {
-            const model =
-              (msg as any).model || selectedModelIds[index] || `model-${index}`
+            const model = 
+              ('model' in msg && typeof msg.model === 'string' ? msg.model : '') ||
+              selectedModelIds[index] || 
+              `model-${index}`
             const provider =
-              models.find((m) => m.id === model)?.provider || "unknown"
+              models.find((m: ModelConfig) => m.id === model)?.provider || "unknown"
 
             return {
               model,
@@ -381,7 +386,7 @@ export function MultiChat() {
             transition={{ layout: { duration: 0 } }}
           >
             <h1 className="mb-6 text-3xl font-medium tracking-tight">
-              What's on your mind?
+              What&apos;s on your mind?
             </h1>
           </motion.div>
         ) : (

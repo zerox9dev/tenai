@@ -1,6 +1,5 @@
 import { toast } from "@/components/ui/toast"
-import { fetchWithCSRF } from "@/lib/fetch"
-import { useModel } from "@/lib/model-store/provider"
+import { fetchWithCSRF, useFavoriteModels as useFavoriteModelsQuery } from "@/lib/fetch"
 import { useUser } from "@/lib/user-store/provider"
 import { debounce } from "@/lib/utils"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -12,13 +11,12 @@ type FavoriteModelsResponse = {
 
 export function useFavoriteModels() {
   const queryClient = useQueryClient()
-  const { favoriteModels: initialFavoriteModels, refreshFavoriteModelsSilent } =
-    useModel()
+  const { data: favoriteModelsData } = useFavoriteModelsQuery()
   const { refreshUser } = useUser()
 
   // Ensure we always have an array
-  const safeInitialData = Array.isArray(initialFavoriteModels)
-    ? initialFavoriteModels
+  const safeInitialData = Array.isArray(favoriteModelsData?.favorite_models)
+    ? favoriteModelsData.favorite_models
     : []
 
   // Query to fetch favorite models
@@ -109,16 +107,13 @@ export function useFavoriteModels() {
         description: error.message || "Please try again.",
       })
 
-      // Also refresh ModelProvider and UserProvider on error to sync back with server state
-      refreshFavoriteModelsSilent()
+      // Refresh React Query cache and UserProvider on error to sync back with server state
+      queryClient.invalidateQueries({ queryKey: ['user-preferences', 'favorite-models'] })
       refreshUser()
     },
     onSuccess: () => {
       // Invalidate the cache to trigger a refetch
-      queryClient.invalidateQueries({ queryKey: ["favorite-models"] })
-
-      // Also refresh the ModelProvider's favorite models (silently)
-      refreshFavoriteModelsSilent()
+      queryClient.invalidateQueries({ queryKey: ['user-preferences', 'favorite-models'] })
 
       // Also refresh the UserProvider to update user.favorite_models
       refreshUser()

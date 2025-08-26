@@ -24,8 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useModel } from "@/lib/model-store/provider"
-import { filterAndSortModels } from "@/lib/model-store/utils"
+import { useModels } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -35,7 +34,7 @@ import {
   MagnifyingGlassIcon,
   StarIcon,
 } from "@phosphor-icons/react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
 
@@ -52,17 +51,12 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const { models, isLoading: isLoadingModels, favoriteModels, refreshAll } = useModel()
+  const { data: modelsData, isLoading: isLoadingModels } = useModels()
   const { isModelHidden } = useUserPreferences()
 
-  // Инициализация моделей при первой загрузке
-  useEffect(() => {
-    if (models.length === 0 && !isLoadingModels) {
-      refreshAll()
-    }
-  }, [models.length, isLoadingModels, refreshAll])
+  const models = modelsData?.models || []
 
-  const currentModel = models.find((model) => model.id === selectedModelId)
+  const currentModel = models.find((model: ModelConfig) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
     (provider) => provider.id === currentModel?.icon
   )
@@ -132,14 +126,18 @@ export function ModelSelector({
   }
 
   // Get the hovered model data
-  const hoveredModelData = models.find((model) => model.id === hoveredModel)
+  const hoveredModelData = models.find((model: ModelConfig) => model.id === hoveredModel)
 
-  const filteredModels = filterAndSortModels(
-    models,
-    favoriteModels || [],
-    searchQuery,
-    isModelHidden
-  )
+  // Простая фильтрация моделей без кастомной утилиты
+  const filteredModels = models.filter((model: ModelConfig) => {
+    const matchesSearch = searchQuery === "" || 
+      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      model.provider.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const isNotHidden = !isModelHidden(model.id)
+    
+    return matchesSearch && isNotHidden
+  })
 
   const trigger = (
     <Button
@@ -227,7 +225,7 @@ export function ModelSelector({
                   </p>
                 </div>
               ) : filteredModels.length > 0 ? (
-                filteredModels.map((model) => renderModelItem(model))
+                filteredModels.map((model: ModelConfig) => renderModelItem(model))
               ) : (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -304,7 +302,7 @@ export function ModelSelector({
                   </p>
                 </div>
               ) : filteredModels.length > 0 ? (
-                filteredModels.map((model) => {
+                filteredModels.map((model: ModelConfig) => {
                   const isLocked = !model.accessible
                   const provider = PROVIDERS.find(
                     (provider) => provider.id === model.icon

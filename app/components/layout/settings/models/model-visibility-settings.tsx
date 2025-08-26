@@ -1,25 +1,27 @@
 "use client"
 
 import { Switch } from "@/components/ui/switch"
-import { useModel } from "@/lib/model-store/provider"
+import { useModels } from "@/lib/fetch"
+import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useState } from "react"
 
 export function ModelVisibilitySettings() {
-  const { models } = useModel()
+  const { data: modelsData } = useModels()
+  const models = modelsData?.models || []
   const { toggleModelVisibility, isModelHidden } = useUserPreferences()
   const [searchQuery, setSearchQuery] = useState("")
   const [optimisticStates, setOptimisticStates] = useState<
     Record<string, boolean>
   >({})
 
-  const filteredModels = models.filter((model) =>
+  const filteredModels = models.filter((model: ModelConfig) =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const modelsByProvider = filteredModels.reduce(
-    (acc, model) => {
+    (acc: Record<string, ModelConfig[]>, model: ModelConfig) => {
       const iconKey = model.icon || "unknown"
 
       if (!acc[iconKey]) {
@@ -30,7 +32,7 @@ export function ModelVisibilitySettings() {
 
       return acc
     },
-    {} as Record<string, typeof models>
+    {} as Record<string, ModelConfig[]>
   )
 
   const handleToggle = (modelId: string) => {
@@ -54,8 +56,8 @@ export function ModelVisibilitySettings() {
       : !isModelHidden(modelId)
   }
 
-  const handleGroupToggle = (modelsGroup: typeof models) => {
-    const allVisible = modelsGroup.every((model) =>
+  const handleGroupToggle = (modelsGroup: ModelConfig[]) => {
+    const allVisible = modelsGroup.every((model: ModelConfig) =>
       getModelVisibility(model.id)
     )
 
@@ -63,13 +65,13 @@ export function ModelVisibilitySettings() {
 
     setOptimisticStates((prev) => {
       const newOptimisticStates = { ...prev }
-      modelsGroup.forEach((model) => {
+      modelsGroup.forEach((model: ModelConfig) => {
         newOptimisticStates[model.id] = newState
       })
       return newOptimisticStates
     })
 
-    modelsGroup.forEach((model) => {
+    modelsGroup.forEach((model: ModelConfig) => {
       const currentVisible =
         optimisticStates[model.id] !== undefined
           ? optimisticStates[model.id]
@@ -81,8 +83,8 @@ export function ModelVisibilitySettings() {
     })
   }
 
-  const getGroupVisibility = (modelsGroup: typeof models) => {
-    const visibleCount = modelsGroup.filter((model) =>
+  const getGroupVisibility = (modelsGroup: ModelConfig[]) => {
+    const visibleCount = modelsGroup.filter((model: ModelConfig) =>
       getModelVisibility(model.id)
     ).length
 
@@ -112,7 +114,8 @@ export function ModelVisibilitySettings() {
       {/* Models grouped by icon/type */}
       <div className="space-y-6 pb-6">
         {Object.entries(modelsByProvider).map(([iconKey, modelsGroup]) => {
-          const firstModel = modelsGroup[0]
+          const typedModelsGroup = modelsGroup as ModelConfig[]
+          const firstModel = typedModelsGroup[0]
           const provider = PROVIDERS.find((p) => p.id === firstModel.icon)
 
           return (
@@ -121,15 +124,15 @@ export function ModelVisibilitySettings() {
                 {provider?.icon && <provider.icon className="size-5" />}
                 <h4 className="font-medium">{provider?.name || iconKey}</h4>
                 <span className="text-muted-foreground text-sm">
-                  ({modelsGroup.length} models)
+                  ({typedModelsGroup.length} models)
                 </span>
                 <div className="ml-auto flex items-center gap-2">
                   <span className="text-muted-foreground text-xs">All</span>
                   <Switch
-                    checked={getGroupVisibility(modelsGroup) === true}
-                    onCheckedChange={() => handleGroupToggle(modelsGroup)}
+                    checked={getGroupVisibility(typedModelsGroup) === true}
+                    onCheckedChange={() => handleGroupToggle(typedModelsGroup)}
                     className={
-                      getGroupVisibility(modelsGroup) === "indeterminate"
+                      getGroupVisibility(typedModelsGroup) === "indeterminate"
                         ? "opacity-60"
                         : ""
                     }
@@ -138,7 +141,7 @@ export function ModelVisibilitySettings() {
               </div>
 
               <div className="space-y-2 pl-7">
-                {modelsGroup.map((model) => {
+                {typedModelsGroup.map((model: ModelConfig) => {
                   const modelProvider = PROVIDERS.find(
                     (p) => p.id === model.provider
                   )

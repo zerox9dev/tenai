@@ -25,8 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useModel } from "@/lib/model-store/provider"
-import { filterAndSortModels } from "@/lib/model-store/utils"
+import { useModels } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -57,10 +56,11 @@ export function MultiModelSelector({
   isUserAuthenticated = true,
   maxModels = 5,
 }: MultiModelSelectorProps) {
-  const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
+  const { data: modelsData, isLoading: isLoadingModels } = useModels()
+  const models = modelsData?.models || []
   const { isModelHidden } = useUserPreferences()
 
-  const selectedModels = models.filter((model) =>
+  const selectedModels = models.filter((model: ModelConfig) =>
     selectedModelIds.includes(model.id)
   )
   const isMobile = useBreakpoint(768)
@@ -148,14 +148,18 @@ export function MultiModelSelector({
   }
 
   // Get the hovered model data
-  const hoveredModelData = models.find((model) => model.id === hoveredModel)
+  const hoveredModelData = models.find((model: ModelConfig) => model.id === hoveredModel)
 
-  const filteredModels = filterAndSortModels(
-    models,
-    favoriteModels || [],
-    searchQuery,
-    isModelHidden
-  )
+  // Простая фильтрация моделей без кастомной утилиты
+  const filteredModels = models.filter((model: ModelConfig) => {
+    const matchesSearch = searchQuery === "" || 
+      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      model.provider.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const isNotHidden = !isModelHidden(model.id)
+    
+    return matchesSearch && isNotHidden
+  })
 
   if (isLoadingModels) {
     return null
@@ -231,7 +235,7 @@ export function MultiModelSelector({
             >
               <div className="flex flex-shrink-0 -space-x-1">
                 <AnimatePresence mode="popLayout">
-                  {selectedModels.slice(0, 3).map((model, index) => {
+                  {selectedModels.slice(0, 3).map((model: ModelConfig, index: number) => {
                     const provider = PROVIDERS.find((p) => p.id === model.icon)
                     return provider?.icon ? (
                       <motion.div
@@ -368,7 +372,7 @@ export function MultiModelSelector({
                   </p>
                 </div>
               ) : filteredModels.length > 0 ? (
-                filteredModels.map((model) => renderModelItem(model))
+                filteredModels.map((model: ModelConfig) => renderModelItem(model))
               ) : (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -448,7 +452,7 @@ export function MultiModelSelector({
                   </p>
                 </div>
               ) : filteredModels.length > 0 ? (
-                filteredModels.map((model) => {
+                filteredModels.map((model: ModelConfig) => {
                   const isLocked = !model.accessible
                   const isSelected = selectedModelIds.includes(model.id)
                   const provider = PROVIDERS.find(
