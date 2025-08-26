@@ -38,24 +38,25 @@ export async function getAllModels(): Promise<ModelConfig[]> {
 export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
   const models = await getAllModels()
 
-  const freeModels = models
-    .filter(
-      (model) =>
-        FREE_MODELS_IDS.includes(model.id)
-    )
-    .map((model) => ({
-      ...model,
-      accessible: true,
-    }))
+  // Get available ENV providers
+  const { env } = await import("../openproviders/env")
+  const envProviders = new Set<string>()
+  
+  if (env.OPENAI_API_KEY) envProviders.add("openai")
+  if (env.ANTHROPIC_API_KEY) envProviders.add("anthropic")
+  if (env.XAI_API_KEY) envProviders.add("xai")
+  if (env.OPENROUTER_API_KEY) envProviders.add("openrouter")
 
-  const proModels = models
-    .filter((model) => !freeModels.map((m) => m.id).includes(model.id))
-    .map((model) => ({
+  return models.map((model) => {
+    // Model is accessible if it's free OR we have ENV key for its provider
+    const accessible = FREE_MODELS_IDS.includes(model.id) || 
+                      envProviders.has(model.providerId)
+    
+    return {
       ...model,
-      accessible: false,
-    }))
-
-  return [...freeModels, ...proModels]
+      accessible,
+    }
+  })
 }
 
 export async function getModelsForProvider(
@@ -84,6 +85,29 @@ export async function getModelsForUserProviders(
   const flatProviderModels = providerModels.flat()
 
   return flatProviderModels
+}
+
+// Function to get all models accessible with ENV keys
+export async function getModelsWithEnvAccess(): Promise<ModelConfig[]> {
+  const models = await getAllModels()
+  
+  // Get available ENV providers
+  const { env } = await import("../openproviders/env")
+  const envProviders = new Set<string>()
+  
+  if (env.OPENAI_API_KEY) envProviders.add("openai")
+  if (env.ANTHROPIC_API_KEY) envProviders.add("anthropic")
+  if (env.XAI_API_KEY) envProviders.add("xai")
+  if (env.OPENROUTER_API_KEY) envProviders.add("openrouter")
+
+  return models
+    .filter((model) => 
+      FREE_MODELS_IDS.includes(model.id) || envProviders.has(model.providerId)
+    )
+    .map((model) => ({
+      ...model,
+      accessible: true,
+    }))
 }
 
 // Synchronous function to get model info for simple lookups

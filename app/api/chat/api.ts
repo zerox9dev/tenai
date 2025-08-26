@@ -33,10 +33,11 @@ export async function validateAndTrackUsage({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const provider = getProviderForModel(model as any)
 
-    const userApiKey = await getUserKey(userId, provider)
+    const { getEffectiveApiKey } = await import("@/lib/user-keys")
+    const effectiveApiKey = await getEffectiveApiKey(userId, provider)
 
-    // If no API key and model is not in free list, deny access
-    if (!userApiKey && !FREE_MODELS_IDS.includes(model)) {
+    // If no API key (neither user nor ENV) and model is not in free list, deny access
+    if (!effectiveApiKey && !FREE_MODELS_IDS.includes(model)) {
       throw new Error(
         `This model requires an API key for ${provider}. Please add your API key in settings or use a free model.`
       )

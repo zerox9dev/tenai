@@ -12,9 +12,9 @@ const ZolaIcon = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       {...props}
     >
-      <g clipPath="url(#teanai)">
+      <g clipPath="url(#tenai)">
         <mask
-          id="teanai"
+          id="tenai"
           width={80}
           height={80}
           x={0}
@@ -31,7 +31,7 @@ const ZolaIcon = (props: SVGProps<SVGSVGElement>) => {
         </g>
       </g>
       <defs>
-        <clipPath id="teanai">
+        <clipPath id="tenai">
           <path fill="currentColor" d="M0 0h80v80H0z" />
         </clipPath>
       </defs>

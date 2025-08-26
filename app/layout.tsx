@@ -26,9 +26,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "teanai",
+  title: "tenai",
   description:
-    "teanai is the open-source interface for AI chat. Multi-model, BYOK-ready, and fully self-hostable. Use Claude, OpenAI, Grok, local models, and more, all in one place.",
+    "tenai is the open-source interface for AI chat. Multi-model, BYOK-ready, and fully self-hostable. Use Claude, OpenAI, Grok, local models, and more, all in one place.",
 }
 
 export default async function RootLayout({

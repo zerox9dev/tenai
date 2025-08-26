@@ -3,7 +3,7 @@ import { ModelConfig } from "../types"
 
 const claudeModels: ModelConfig[] = [
   {
-    id: "claude-4-opus",
+    id: "claude-opus-4-20250514",
     name: "Claude 4 Opus",
     provider: "Anthropic",
     providerId: "anthropic",
@@ -26,9 +26,10 @@ const claudeModels: ModelConfig[] = [
     website: "https://www.anthropic.com",
     apiDocs: "https://docs.anthropic.com",
     icon: "claude",
+    apiSdk: (apiKey?: string) => openproviders("claude-opus-4-20250514", undefined, apiKey),
   },
   {
-    id: "claude-4-sonnet",
+    id: "claude-sonnet-4-20250514",
     name: "Claude 4 Sonnet",
     provider: "Anthropic",
     providerId: "anthropic",
@@ -50,6 +51,7 @@ const claudeModels: ModelConfig[] = [
     website: "https://www.anthropic.com",
     apiDocs: "https://docs.anthropic.com",
     icon: "claude",
+    apiSdk: (apiKey?: string) => openproviders("claude-sonnet-4-20250514", undefined, apiKey),
   },
 ]
 

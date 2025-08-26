@@ -6,6 +6,8 @@ const MODEL_PROVIDER_MAP: Record<string, Provider> = {
   "gpt-5-nano": "openai",
 
   // Anthropic
+  "claude-opus-4-20250514": "anthropic",
+  "claude-sonnet-4-20250514": "anthropic",
 
   // XAI
   "grok-4-latest": "xai",

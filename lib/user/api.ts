@@ -22,7 +22,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     // return fake user profile for no supabase
     return {
       id: "guest",
-      email: "guest@teanai.chat",
+      email: "guest@tenai.chat",
       display_name: "Guest",
       profile_image: "",
       anonymous: true,

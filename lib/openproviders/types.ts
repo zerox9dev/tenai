@@ -2,7 +2,9 @@ export type OpenAIModel =
   | "gpt-5"
   | "gpt-5-nano"
 
-export type AnthropicModel = never
+export type AnthropicModel =
+  | "claude-opus-4-20250514"
+  | "claude-sonnet-4-20250514"
 
 export type XaiModel =
   | "grok-4-latest"

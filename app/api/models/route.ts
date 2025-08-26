@@ -2,6 +2,7 @@ import {
   getAllModels,
   getModelsForUserProviders,
   getModelsWithAccessFlags,
+  getModelsWithEnvAccess,
   refreshModelsCache,
 } from "@/lib/models"
 import { createClient } from "@/lib/supabase/server"
@@ -12,11 +13,8 @@ export async function GET() {
     const supabase = await createClient()
 
     if (!supabase) {
-      const allModels = await getAllModels()
-      const models = allModels.map((model) => ({
-        ...model,
-        accessible: true,
-      }))
+      // For non-authenticated users, show models with ENV access
+      const models = await getModelsWithEnvAccess()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -28,7 +26,8 @@ export async function GET() {
     const { data: authData } = await supabase.auth.getUser()
 
     if (!authData?.user?.id) {
-      const models = await getModelsWithAccessFlags()
+      // For anonymous users, show models with ENV access
+      const models = await getModelsWithEnvAccess()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -44,7 +43,8 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching user keys:", error)
-      const models = await getModelsWithAccessFlags()
+      // Fallback to models with ENV access
+      const models = await getModelsWithEnvAccess()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -55,17 +55,31 @@ export async function GET() {
 
     const userProviders = data?.map((k) => k.provider) || []
 
+    // Combine user provider models with ENV accessible models
+    let models: any[]
     if (userProviders.length === 0) {
-      const models = await getModelsWithAccessFlags()
-      return new Response(JSON.stringify({ models }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
+      // No user keys, show ENV accessible models
+      models = await getModelsWithEnvAccess()
+    } else {
+      // User has some keys, combine user models with ENV models
+      const userModels = await getModelsForUserProviders(userProviders)
+      const envModels = await getModelsWithEnvAccess()
+      
+      // Create a map to avoid duplicates
+      const modelMap = new Map()
+      
+      // Add user models first (they take priority)
+      userModels.forEach(model => modelMap.set(model.id, model))
+      
+      // Add ENV models if not already present
+      envModels.forEach(model => {
+        if (!modelMap.has(model.id)) {
+          modelMap.set(model.id, model)
+        }
       })
+      
+      models = Array.from(modelMap.values())
     }
-
-    const models = await getModelsForUserProviders(userProviders)
 
     return new Response(JSON.stringify({ models }), {
       status: 200,

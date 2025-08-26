@@ -1,8 +1,8 @@
-# teanai
+# tenai
 
 [teanai.chat](https://teanai.chat)
 
-**teanai** is the open-source chat interface for all your models.
+**tenai** is the open-source chat interface for all your models.
 
 ![teanai cover](./public/cover_teanai.jpg)
 
@@ -24,7 +24,7 @@
 
 ```bash
 git clone https://github.com/ibelick/teanai.git
-cd teanai
+cd tenai
 npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
 npm run dev

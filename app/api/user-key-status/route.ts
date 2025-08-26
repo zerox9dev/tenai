@@ -14,13 +14,22 @@ export async function GET() {
       )
     }
 
+    // Get available ENV providers
+    const { env } = await import("@/lib/openproviders/env")
+    const envProviders = new Set<string>()
+    
+    if (env.OPENAI_API_KEY) envProviders.add("openai")
+    if (env.ANTHROPIC_API_KEY) envProviders.add("anthropic")
+    if (env.XAI_API_KEY) envProviders.add("xai")
+    if (env.OPENROUTER_API_KEY) envProviders.add("openrouter")
+
     const { data: authData } = await supabase.auth.getUser()
 
     if (!authData?.user?.id) {
-      // Anonymous users don't have keys, return empty status
+      // Anonymous users get ENV provider status
       const providerStatus = SUPPORTED_PROVIDERS.reduce(
         (acc, provider) => {
-          acc[provider] = false
+          acc[provider] = envProviders.has(provider)
           return acc
         },
         {} as Record<string, boolean>
@@ -28,11 +37,11 @@ export async function GET() {
       return NextResponse.json(providerStatus)
     }
 
-    // Check if user is anonymous - they shouldn't have keys
+    // Check if user is anonymous - they get ENV provider status
     if (authData.user.is_anonymous) {
       const providerStatus = SUPPORTED_PROVIDERS.reduce(
         (acc, provider) => {
-          acc[provider] = false
+          acc[provider] = envProviders.has(provider)
           return acc
         },
         {} as Record<string, boolean>
@@ -50,10 +59,11 @@ export async function GET() {
     }
 
     // Create status object for all supported providers
+    // Provider is available if user has key OR ENV key exists
     const userProviders = data?.map((k) => k.provider) || []
     const providerStatus = SUPPORTED_PROVIDERS.reduce(
       (acc, provider) => {
-        acc[provider] = userProviders.includes(provider)
+        acc[provider] = userProviders.includes(provider) || envProviders.has(provider)
         return acc
       },
       {} as Record<string, boolean>

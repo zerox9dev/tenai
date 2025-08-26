@@ -142,7 +142,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <div className="text-sidebar-foreground text-sm font-medium">
-              teanai is open source
+              tenai is open source
             </div>
             <div className="text-sidebar-foreground/70 text-xs">
               Star the repo on GitHub!
