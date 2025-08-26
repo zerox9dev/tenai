@@ -1,7 +1,7 @@
 import { APP_DOMAIN } from "@/lib/config"
 import type { UserProfile } from "@/lib/user/types"
 import { SupabaseClient } from "@supabase/supabase-js"
-import { fetchClient } from "./fetch"
+import { fetchWithCSRF } from "./fetch"
 import { API_ROUTE_CREATE_GUEST, API_ROUTE_UPDATE_CHAT_MODEL } from "./routes"
 import { createClient } from "./supabase/client"
 
@@ -10,7 +10,7 @@ import { createClient } from "./supabase/client"
  */
 export async function createGuestUser(guestId: string) {
   try {
-    const res = await fetchClient(API_ROUTE_CREATE_GUEST, {
+    const res = await fetchWithCSRF(API_ROUTE_CREATE_GUEST, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: guestId }),
@@ -52,7 +52,7 @@ export async function checkRateLimits(
   isAuthenticated: boolean
 ) {
   try {
-    const res = await fetchClient(
+    const res = await fetchWithCSRF(
       `/api/rate-limits?userId=${userId}&isAuthenticated=${isAuthenticated}`,
       {
         method: "GET",
@@ -78,7 +78,7 @@ export async function checkRateLimits(
  */
 export async function updateChatModel(chatId: string, model: string) {
   try {
-    const res = await fetchClient(API_ROUTE_UPDATE_CHAT_MODEL, {
+    const res = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, model }),

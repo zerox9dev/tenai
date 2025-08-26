@@ -1,179 +1,98 @@
-"use client"
-
-import { fetchClient } from "@/lib/fetch"
+// Современный Zustand store заменяет Context провайдер
 import { ModelConfig } from "@/lib/models/types"
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-type UserKeyStatus = {
+export type UserKeyStatus = {
   openrouter: boolean
   openai: boolean
-
   xai: boolean
   anthropic: boolean
-  [key: string]: boolean // Allow for additional providers
 }
 
-type ModelContextType = {
+interface ModelsStore {
   models: ModelConfig[]
   userKeyStatus: UserKeyStatus
   favoriteModels: string[]
   isLoading: boolean
-  refreshModels: () => Promise<void>
-  refreshUserKeyStatus: () => Promise<void>
-  refreshFavoriteModels: () => Promise<void>
-  refreshFavoriteModelsSilent: () => Promise<void>
+  
+  // Actions
+  setModels: (models: ModelConfig[]) => void
+  setUserKeyStatus: (status: UserKeyStatus) => void
+  setFavoriteModels: (models: string[]) => void
+  setLoading: (loading: boolean) => void
+  
+  // Async actions
+  fetchModels: () => Promise<void>
+  fetchUserKeyStatus: () => Promise<void>
+  fetchFavoriteModels: () => Promise<void>
   refreshAll: () => Promise<void>
 }
 
-const ModelContext = createContext<ModelContextType | undefined>(undefined)
-
-export function ModelProvider({ children }: { children: React.ReactNode }) {
-  const [models, setModels] = useState<ModelConfig[]>([])
-  const [userKeyStatus, setUserKeyStatus] = useState<UserKeyStatus>({
-    openrouter: false,
-    openai: false,
-
-
-    xai: false,
-    anthropic: false,
-  })
-  const [favoriteModels, setFavoriteModels] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchModels = useCallback(async () => {
-    try {
-      const response = await fetchClient("/api/models")
-      if (response.ok) {
-        const data = await response.json()
-        setModels(data.models || [])
-      }
-    } catch (error) {
-      console.error("Failed to fetch models:", error)
-    }
-  }, [])
-
-  const fetchUserKeyStatus = useCallback(async () => {
-    try {
-      const response = await fetchClient("/api/user-key-status")
-      if (response.ok) {
-        const data = await response.json()
-        setUserKeyStatus(data)
-      }
-    } catch (error) {
-      console.error("Failed to fetch user key status:", error)
-      // Set default values on error
-      setUserKeyStatus({
-        openrouter: false,
-        openai: false,
-
-        xai: false,
-        anthropic: false,
-      })
-    }
-  }, [])
-
-  const fetchFavoriteModels = useCallback(async () => {
-    try {
-      const response = await fetchClient(
-        "/api/user-preferences/favorite-models"
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setFavoriteModels(data.favorite_models || [])
-      }
-    } catch (error) {
-      console.error("Failed to fetch favorite models:", error)
-      setFavoriteModels([])
-    }
-  }, [])
-
-  const refreshModels = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await fetchModels()
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchModels])
-
-  const refreshUserKeyStatus = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await fetchUserKeyStatus()
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchUserKeyStatus])
-
-  const refreshFavoriteModels = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await fetchFavoriteModels()
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchFavoriteModels])
-
-  const refreshFavoriteModelsSilent = useCallback(async () => {
-    try {
-      await fetchFavoriteModels()
-    } catch (error) {
-      console.error(
-        "❌ ModelProvider: Failed to silently refresh favorite models:",
-        error
-      )
-    }
-  }, [fetchFavoriteModels])
-
-  const refreshAll = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await Promise.all([
-        fetchModels(),
-        fetchUserKeyStatus(),
-        fetchFavoriteModels(),
-      ])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchModels, fetchUserKeyStatus, fetchFavoriteModels])
-
-  // Initial data fetch
-  useEffect(() => {
-    refreshAll()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run once on mount
-
-  return (
-    <ModelContext.Provider
-      value={{
-        models,
-        userKeyStatus,
-        favoriteModels,
-        isLoading,
-        refreshModels,
-        refreshUserKeyStatus,
-        refreshFavoriteModels,
-        refreshFavoriteModelsSilent,
-        refreshAll,
-      }}
-    >
-      {children}
-    </ModelContext.Provider>
+export const useModel = create<ModelsStore>()(
+  persist(
+    (set, get) => ({
+      models: [],
+      userKeyStatus: { openai: false, anthropic: false, xai: false, openrouter: false },
+      favoriteModels: [],
+      isLoading: false,
+      
+      setModels: (models) => set({ models }),
+      setUserKeyStatus: (userKeyStatus) => set({ userKeyStatus }),
+      setFavoriteModels: (favoriteModels) => set({ favoriteModels }),
+      setLoading: (isLoading) => set({ isLoading }),
+      
+      fetchModels: async () => {
+        try {
+          const { fetchWithCSRF } = await import("@/lib/fetch")
+          const data = await fetchWithCSRF("/api/models")
+          set({ models: data.models || [] })
+        } catch (error) {
+          console.error("Failed to fetch models:", error)
+        }
+      },
+      
+      fetchUserKeyStatus: async () => {
+        try {
+          const { fetchWithCSRF } = await import("@/lib/fetch")
+          const data = await fetchWithCSRF("/api/user-key-status")
+          set({ userKeyStatus: data })
+        } catch (error) {
+          console.error("Failed to fetch user key status:", error)
+          set({ userKeyStatus: { openrouter: false, openai: false, xai: false, anthropic: false } })
+        }
+      },
+      
+      fetchFavoriteModels: async () => {
+        try {
+          const { fetchWithCSRF } = await import("@/lib/fetch")
+          const data = await fetchWithCSRF("/api/user-preferences/favorite-models")
+          set({ favoriteModels: data.favorite_models || [] })
+        } catch (error) {
+          console.error("Failed to fetch favorite models:", error)
+          set({ favoriteModels: [] })
+        }
+      },
+      
+      refreshAll: async () => {
+        const { fetchModels, fetchUserKeyStatus, fetchFavoriteModels } = get()
+        set({ isLoading: true })
+        try {
+          await Promise.all([
+            fetchModels(),
+            fetchUserKeyStatus(),
+            fetchFavoriteModels(),
+          ])
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+    }),
+    { name: 'models-store' }
   )
-}
+)
 
-// Custom hook to use the model context
-export function useModel() {
-  const context = useContext(ModelContext)
-  if (context === undefined) {
-    throw new Error("useModel must be used within a ModelProvider")
-  }
-  return context
+// Обратная совместимость - заглушка для старого провайдера
+export function ModelProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
 }

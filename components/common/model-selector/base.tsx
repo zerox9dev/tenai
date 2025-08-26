@@ -35,7 +35,7 @@ import {
   MagnifyingGlassIcon,
   StarIcon,
 } from "@phosphor-icons/react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
 
@@ -52,8 +52,15 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
+  const { models, isLoading: isLoadingModels, favoriteModels, refreshAll } = useModel()
   const { isModelHidden } = useUserPreferences()
+
+  // Инициализация моделей при первой загрузке
+  useEffect(() => {
+    if (models.length === 0 && !isLoadingModels) {
+      refreshAll()
+    }
+  }, [models.length, isLoadingModels, refreshAll])
 
   const currentModel = models.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(

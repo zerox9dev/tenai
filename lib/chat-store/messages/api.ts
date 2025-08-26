@@ -1,7 +1,13 @@
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { Message as MessageAISDK } from "ai"
-import { readFromIndexedDB, writeToIndexedDB } from "../persist"
+import { messageQueries } from "../persist"
+
+// Расширенный тип для MessageAISDK с дополнительными полями
+interface ExtendedMessageAISDK extends MessageAISDK {
+  message_group_id?: string | null
+  model?: string | null
+}
 
 export async function getMessagesFromDb(
   chatId: string
@@ -39,7 +45,7 @@ export async function getMessagesFromDb(
   }))
 }
 
-async function insertMessageToDb(chatId: string, message: MessageAISDK) {
+async function insertMessageToDb(chatId: string, message: ExtendedMessageAISDK) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -49,12 +55,12 @@ async function insertMessageToDb(chatId: string, message: MessageAISDK) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
-    message_group_id: (message as any).message_group_id || null,
-    model: (message as any).model || null,
+    message_group_id: message.message_group_id || null,
+    model: message.model || null,
   })
 }
 
-async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
+async function insertMessagesToDb(chatId: string, messages: ExtendedMessageAISDK[]) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -64,8 +70,8 @@ async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
-    message_group_id: (message as any).message_group_id || null,
-    model: (message as any).model || null,
+    message_group_id: message.message_group_id || null,
+    model: message.model || null,
   }))
 
   await supabase.from("messages").insert(payload)
@@ -85,19 +91,18 @@ async function deleteMessagesFromDb(chatId: string) {
   }
 }
 
-type ChatMessageEntry = {
-  id: string
-  messages: MessageAISDK[]
-}
-
 export async function getCachedMessages(
   chatId: string
 ): Promise<MessageAISDK[]> {
-  const entry = await readFromIndexedDB<ChatMessageEntry>("messages", chatId)
-
-  if (!entry || Array.isArray(entry)) return []
-
-  return (entry.messages || []).sort(
+  const messages = await messageQueries.getByChatId(chatId)
+  
+  // Конвертируем из новой структуры БД в старую структуру AI SDK
+  return messages.map(msg => ({
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    createdAt: new Date(msg.created_at),
+  })).sort(
     (a, b) => +new Date(a.createdAt || 0) - +new Date(b.createdAt || 0)
   )
 }
@@ -106,30 +111,44 @@ export async function cacheMessages(
   chatId: string,
   messages: MessageAISDK[]
 ): Promise<void> {
-  await writeToIndexedDB("messages", { id: chatId, messages })
+  // Конвертируем из AI SDK структуры в новую структуру БД
+  const dbMessages = messages.map(msg => ({
+    id: msg.id,
+    chat_id: chatId,
+    content: msg.content as string,
+    role: msg.role,
+    created_at: msg.createdAt?.toISOString() || new Date().toISOString(),
+  }))
+  
+  await messageQueries.saveBulk(dbMessages)
 }
 
 export async function addMessage(
   chatId: string,
-  message: MessageAISDK
+  message: ExtendedMessageAISDK
 ): Promise<void> {
   await insertMessageToDb(chatId, message)
-  const current = await getCachedMessages(chatId)
-  const updated = [...current, message]
-
-  await writeToIndexedDB("messages", { id: chatId, messages: updated })
+  
+  // Добавляем сообщение в локальную БД
+  await messageQueries.save({
+    id: message.id,
+    chat_id: chatId,
+    content: message.content as string,
+    role: message.role,
+    created_at: message.createdAt?.toISOString() || new Date().toISOString(),
+  })
 }
 
 export async function setMessages(
   chatId: string,
-  messages: MessageAISDK[]
+  messages: ExtendedMessageAISDK[]
 ): Promise<void> {
   await insertMessagesToDb(chatId, messages)
-  await writeToIndexedDB("messages", { id: chatId, messages })
+  await cacheMessages(chatId, messages)
 }
 
 export async function clearMessagesCache(chatId: string): Promise<void> {
-  await writeToIndexedDB("messages", { id: chatId, messages: [] })
+  await messageQueries.deleteByChatId(chatId)
 }
 
 export async function clearMessagesForChat(chatId: string): Promise<void> {

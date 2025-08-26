@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
-import { clearAllIndexedDBStores } from "@/lib/chat-store/persist"
+import { clearAllData } from "@/lib/chat-store/persist"
 import { useUser } from "@/lib/user-store/provider"
 import { SignOut } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
@@ -20,7 +20,7 @@ export function AccountManagement() {
       await resetMessages()
       await resetChats()
       await signOut()
-      await clearAllIndexedDBStores()
+      await clearAllData()
       router.push("/")
     } catch (e) {
       console.error("Sign out failed:", e)

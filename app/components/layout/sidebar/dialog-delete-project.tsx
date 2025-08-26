@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { fetchClient } from "@/lib/fetch"
+import { fetchWithCSRF } from "@/lib/fetch"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -37,7 +37,7 @@ export function DialogDeleteProject({
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      const response = await fetchClient(`/api/projects/${projectId}`, {
+      const response = await fetchWithCSRF(`/api/projects/${projectId}`, {
         method: "DELETE",
       })
 

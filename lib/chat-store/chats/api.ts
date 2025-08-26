@@ -1,13 +1,31 @@
-import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
+import { chatQueries } from "@/lib/chat-store/persist"
+import type { Chat as PersistChat } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { MODEL_DEFAULT } from "../../config"
-import { fetchClient } from "../../fetch"
+import { fetchWithCSRF } from "../../fetch"
 import {
   API_ROUTE_TOGGLE_CHAT_PIN,
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
+
+// Конвертер типов между Supabase и Dexie
+function convertToPersistChat(supabaseChat: Chats): PersistChat {
+  return {
+    id: supabaseChat.id,
+    title: supabaseChat.title || "",
+    created_at: supabaseChat.created_at || new Date().toISOString(),
+    updated_at: supabaseChat.updated_at || new Date().toISOString(),
+  }
+}
+
+// Сохранение массива чатов в IndexedDB
+async function saveChatsToCache(chats: Chats[]): Promise<void> {
+  for (const chat of chats) {
+    await chatQueries.save(convertToPersistChat(chat))
+  }
+}
 
 export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
   const supabase = createClient()
@@ -89,14 +107,14 @@ export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
   const data = await getChatsForUserInDb(userId)
 
   if (data.length > 0) {
-    await writeToIndexedDB("chats", data)
+    await saveChatsToCache(data)
   }
 
   return data
 }
 
 export async function getCachedChats(): Promise<Chats[]> {
-  const all = await readFromIndexedDB<Chats>("chats")
+  const all = await chatQueries.getAll()
   return (all as Chats[]).sort(
     (a, b) => +new Date(b.created_at || "") - +new Date(a.created_at || "")
   )
@@ -111,27 +129,24 @@ export async function updateChatTitle(
   const updated = (all as Chats[]).map((c) =>
     c.id === id ? { ...c, title } : c
   )
-  await writeToIndexedDB("chats", updated)
+  await saveChatsToCache(updated)
 }
 
 export async function deleteChat(id: string): Promise<void> {
   await deleteChatInDb(id)
-  const all = await getCachedChats()
-  await writeToIndexedDB(
-    "chats",
-    (all as Chats[]).filter((c) => c.id !== id)
-  )
+  // Удаляем чат напрямую из IndexedDB
+  await chatQueries.delete(id)
 }
 
 export async function getChat(chatId: string): Promise<Chat | null> {
-  const all = await readFromIndexedDB<Chat>("chats")
+  const all = await chatQueries.getAll()
   return (all as Chat[]).find((c) => c.id === chatId) || null
 }
 
 export async function getUserChats(userId: string): Promise<Chat[]> {
   const data = await getAllUserChatsInDb(userId)
   if (!data) return []
-  await writeToIndexedDB("chats", data)
+  await saveChatsToCache(data)
   return data
 }
 
@@ -144,21 +159,21 @@ export async function createChat(
   const id = await createChatInDb(userId, title, model, systemPrompt)
   const finalId = id ?? crypto.randomUUID()
 
-  await writeToIndexedDB("chats", {
+  const persistChat: PersistChat = {
     id: finalId,
     title,
-    model,
-    user_id: userId,
-    system_prompt: systemPrompt,
     created_at: new Date().toISOString(),
-  })
+    updated_at: new Date().toISOString(),
+  }
+
+  await chatQueries.save(persistChat)
 
   return finalId
 }
 
 export async function updateChatModel(chatId: string, model: string) {
   try {
-    const res = await fetchClient(API_ROUTE_UPDATE_CHAT_MODEL, {
+    const res = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, model }),
@@ -176,7 +191,7 @@ export async function updateChatModel(chatId: string, model: string) {
     const updated = (all as Chats[]).map((c) =>
       c.id === chatId ? { ...c, model } : c
     )
-    await writeToIndexedDB("chats", updated)
+    await saveChatsToCache(updated)
 
     return responseData
   } catch (error) {
@@ -187,7 +202,7 @@ export async function updateChatModel(chatId: string, model: string) {
 
 export async function toggleChatPin(chatId: string, pinned: boolean) {
   try {
-    const res = await fetchClient(API_ROUTE_TOGGLE_CHAT_PIN, {
+    const res = await fetchWithCSRF(API_ROUTE_TOGGLE_CHAT_PIN, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, pinned }),
@@ -204,7 +219,7 @@ export async function toggleChatPin(chatId: string, pinned: boolean) {
     const updated = (all as Chats[]).map((c) =>
       c.id === chatId ? { ...c, pinned, pinned_at: pinned ? now : null } : c
     )
-    await writeToIndexedDB("chats", updated)
+    await saveChatsToCache(updated)
     return responseData
   } catch (error) {
     console.error("Error updating chat pinned:", error)
@@ -237,7 +252,7 @@ export async function createNewChat(
       payload.projectId = projectId
     }
 
-    const res = await fetchClient("/api/create-chat", {
+    const res = await fetchWithCSRF("/api/create-chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -262,7 +277,7 @@ export async function createNewChat(
       pinned_at: responseData.chat.pinned_at ?? null,
     }
 
-    await writeToIndexedDB("chats", chat)
+    await chatQueries.save(convertToPersistChat(chat))
     return chat
   } catch (error) {
     console.error("Error creating new chat:", error)

@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { fetchClient } from "@/lib/fetch"
+import { fetchWithCSRF } from "@/lib/fetch"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -36,7 +36,7 @@ export function DialogCreateProject({
   const router = useRouter()
   const createProjectMutation = useMutation({
     mutationFn: async (name: string): Promise<CreateProjectData> => {
-      const response = await fetchClient("/api/projects", {
+      const response = await fetchWithCSRF("/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

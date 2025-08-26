@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/toast"
-import { fetchClient } from "@/lib/fetch"
+import { fetchWithCSRF } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { debounce } from "@/lib/utils"
@@ -29,7 +29,7 @@ export function useFavoriteModels() {
   } = useQuery<string[]>({
     queryKey: ["favorite-models"],
     queryFn: async () => {
-      const response = await fetchClient(
+      const response = await fetchWithCSRF(
         "/api/user-preferences/favorite-models"
       )
 
@@ -48,7 +48,7 @@ export function useFavoriteModels() {
   // Mutation to update favorite models
   const updateFavoriteModelsMutation = useMutation({
     mutationFn: async (favoriteModels: string[]) => {
-      const response = await fetchClient(
+      const response = await fetchWithCSRF(
         "/api/user-preferences/favorite-models",
         {
           method: "POST",

@@ -30,7 +30,7 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
     .maybeSingle()
 
   if (userDataError) {
-    throw new Error("Error fetchClienting user data: " + userDataError.message)
+    throw new Error("Error fetchWithCSRFing user data: " + userDataError.message)
   }
   if (!userData) {
     throw new Error("User record not found for id: " + userId)
@@ -83,7 +83,7 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
  *
  * @param supabase - Your Supabase client.
  * @param userId - The ID of the user.
- * @param currentCounts - Current message counts (optional, will be fetchCliented if not provided)
+ * @param currentCounts - Current message counts (optional, will be fetchWithCSRFed if not provided)
  * @param trackDaily - Whether to track the daily message count (default is true)
  * @throws Error if updating fails.
  */
@@ -99,7 +99,7 @@ export async function incrementUsage(
 
   if (userDataError || !userData) {
     throw new Error(
-      "Error fetchClienting user data: " +
+      "Error fetchWithCSRFing user data: " +
         (userDataError?.message || "User not found")
     )
   }
