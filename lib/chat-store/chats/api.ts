@@ -51,7 +51,8 @@ export async function updateChatTitleInDb(id: string, title: string) {
   const supabase = createClient()
   if (!supabase) return
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from("chats")
     .update({ title, updated_at: new Date().toISOString() })
     .eq("id", id)
@@ -91,12 +92,15 @@ export async function createChatInDb(
 
   const { data, error } = await supabase
     .from("chats")
-    .insert({ user_id: userId, title, model, system_prompt: systemPrompt })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert({ user_id: userId, title, model, system_prompt: systemPrompt } as any)
     .select("id")
     .single()
 
-  if (error || !data?.id) return null
-  return data.id
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (error || !(data as any)?.id) return null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data as any).id
 }
 
 export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
@@ -173,18 +177,14 @@ export async function createChat(
 
 export async function updateChatModel(chatId: string, model: string) {
   try {
-    const res = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
+    const responseData = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, model }),
     })
-    const responseData = await res.json()
 
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to update chat model: ${res.status} ${res.statusText}`
-      )
+    if (responseData.error) {
+      throw new Error(responseData.error || "Failed to update chat model")
     }
 
     const all = await getCachedChats()
@@ -202,17 +202,14 @@ export async function updateChatModel(chatId: string, model: string) {
 
 export async function toggleChatPin(chatId: string, pinned: boolean) {
   try {
-    const res = await fetchWithCSRF(API_ROUTE_TOGGLE_CHAT_PIN, {
+    const responseData = await fetchWithCSRF(API_ROUTE_TOGGLE_CHAT_PIN, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, pinned }),
     })
-    const responseData = await res.json()
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to update pinned: ${res.status} ${res.statusText}`
-      )
+    
+    if (responseData.error) {
+      throw new Error(responseData.error || "Failed to update pinned")
     }
     const all = await getCachedChats()
     const now = new Date().toISOString()
@@ -252,15 +249,13 @@ export async function createNewChat(
       payload.projectId = projectId
     }
 
-    const res = await fetchWithCSRF("/api/create-chat", {
+    const responseData = await fetchWithCSRF("/api/create-chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
 
-    const responseData = await res.json()
-
-    if (!res.ok || !responseData.chat) {
+    if (!responseData.chat) {
       throw new Error(responseData.error || "Failed to create chat")
     }
 

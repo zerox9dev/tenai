@@ -16,7 +16,8 @@ export async function validateAndTrackUsage({
   userId,
   model,
   isAuthenticated,
-}: ChatApiParams): Promise<SupabaseClientType | null> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: ChatApiParams): Promise<any> {
   const supabase = await validateUserIdentity(userId, isAuthenticated)
   if (!supabase) return null
 
@@ -45,7 +46,8 @@ export async function validateAndTrackUsage({
   }
 
   // Check usage limits for the model
-  await checkUsageByModel(supabase, userId, model, isAuthenticated)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await checkUsageByModel(supabase as any, userId, model, isAuthenticated)
 
   return supabase
 }
@@ -60,7 +62,8 @@ export async function incrementMessageCount({
   if (!supabase) return
 
   try {
-    await incrementUsage(supabase, userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await incrementUsage(supabase as any, userId)
   } catch (err) {
     console.error("Failed to increment message count:", err)
     // Don't throw error as this shouldn't block the chat

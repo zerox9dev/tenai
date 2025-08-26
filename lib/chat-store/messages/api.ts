@@ -35,13 +35,20 @@ export async function getMessagesFromDb(
   }
 
   return data.map((message) => ({
-    ...message,
-    id: String(message.id),
-    content: message.content ?? "",
-    createdAt: new Date(message.created_at || ""),
-    parts: (message?.parts as MessageAISDK["parts"]) || undefined,
-    message_group_id: message.message_group_id,
-    model: message.model,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(message as any),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    id: String((message as any).id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    content: (message as any).content ?? "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createdAt: new Date((message as any).created_at || ""),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parts: ((message as any)?.parts as MessageAISDK["parts"]) || undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message_group_id: (message as any).message_group_id,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model: (message as any).model,
   }))
 }
 
@@ -57,7 +64,8 @@ async function insertMessageToDb(chatId: string, message: ExtendedMessageAISDK) 
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
     message_group_id: message.message_group_id || null,
     model: message.model || null,
-  })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any)
 }
 
 async function insertMessagesToDb(chatId: string, messages: ExtendedMessageAISDK[]) {
@@ -74,7 +82,8 @@ async function insertMessagesToDb(chatId: string, messages: ExtendedMessageAISDK
     model: message.model || null,
   }))
 
-  await supabase.from("messages").insert(payload)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await supabase.from("messages").insert(payload as any)
 }
 
 async function deleteMessagesFromDb(chatId: string) {

@@ -28,7 +28,8 @@ export async function createChatInDb({
     }
   }
 
-  await checkUsageByModel(supabase, userId, model, isAuthenticated)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await checkUsageByModel(supabase as any, userId, model, isAuthenticated)
 
   const insertData: {
     user_id: string

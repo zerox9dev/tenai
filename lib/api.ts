@@ -10,18 +10,11 @@ import { createClient } from "./supabase/client"
  */
 export async function createGuestUser(guestId: string) {
   try {
-    const res = await fetchWithCSRF(API_ROUTE_CREATE_GUEST, {
+    const responseData = await fetchWithCSRF(API_ROUTE_CREATE_GUEST, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: guestId }),
     })
-    const responseData = await res.json()
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to create guest user: ${res.status} ${res.statusText}`
-      )
-    }
 
     return responseData
   } catch (err) {
@@ -52,20 +45,13 @@ export async function checkRateLimits(
   isAuthenticated: boolean
 ) {
   try {
-    const res = await fetchWithCSRF(
+    const responseData = await fetchWithCSRF(
       `/api/rate-limits?userId=${userId}&isAuthenticated=${isAuthenticated}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       }
     )
-    const responseData = await res.json()
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to check rate limits: ${res.status} ${res.statusText}`
-      )
-    }
     return responseData
   } catch (err) {
     console.error("Error checking rate limits:", err)
@@ -78,19 +64,11 @@ export async function checkRateLimits(
  */
 export async function updateChatModel(chatId: string, model: string) {
   try {
-    const res = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
+    const responseData = await fetchWithCSRF(API_ROUTE_UPDATE_CHAT_MODEL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId, model }),
     })
-    const responseData = await res.json()
-
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to update chat model: ${res.status} ${res.statusText}`
-      )
-    }
 
     return responseData
   } catch (error) {

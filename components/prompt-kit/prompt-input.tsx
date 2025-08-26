@@ -173,6 +173,17 @@ function PromptInputAction({
   side = "top",
   ...props
 }: PromptInputActionProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Render without tooltip during SSR and initial hydration
+  if (!mounted) {
+    return <>{children}</>
+  }
+
   return (
     <Tooltip {...props}>
       <TooltipTrigger asChild>
