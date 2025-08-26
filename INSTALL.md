@@ -1,8 +1,8 @@
-# Zola Installation Guide
+# teanai Installation Guide
 
-Zola is a free, open-source AI chat app with multi-model support. This guide covers how to install and run Zola on different platforms, including Docker deployment options.
+teanai is a free, open-source AI chat app with multi-model support. This guide covers how to install and run teanai on different platforms, including Docker deployment options.
 
-![Zola screenshot](./public/cover_zola.webp)
+![teanai screenshot](./public/cover_teanai.webp)
 
 ## Prerequisites
 
@@ -80,7 +80,7 @@ Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRE
 
 ### BYOK (Bring Your Own Key) Setup
 
-Zola supports BYOK functionality, allowing users to securely store and use their own API keys for AI providers. To enable this feature, you need to configure an encryption key for secure storage of user API keys.
+teanai supports BYOK functionality, allowing users to securely store and use their own API keys for AI providers. To enable this feature, you need to configure an encryption key for secure storage of user API keys.
 
 #### Generating an Encryption Key
 
@@ -326,8 +326,8 @@ Create the buckets `chat-attachments` and `avatars` in your Supabase dashboard:
 
 ```bash
 # Clone the repository
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/ibelick/teanai.git
+cd teanai
 
 # Install dependencies
 npm install
@@ -340,8 +340,8 @@ npm run dev
 
 ```bash
 # Clone the repository
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/ibelick/teanai.git
+cd teanai
 
 # Install dependencies
 npm install
@@ -354,7 +354,7 @@ The application will be available at [http://localhost:3000](http://localhost:30
 
 ## Supabase Setup
 
-Zola requires Supabase for authentication and storage. Follow these steps to set up your Supabase project:
+teanai requires Supabase for authentication and storage. Follow these steps to set up your Supabase project:
 
 1. Create a new project at [Supabase](https://supabase.com)
 2. Set up the database schema using the SQL script below
@@ -439,7 +439,7 @@ Build and run the Docker container:
 
 ```bash
 # Build the Docker image
-docker build -t zola .
+docker build -t teanai .
 
 # Run the container
 docker run -p 3000:3000 \
@@ -448,7 +448,7 @@ docker run -p 3000:3000 \
   -e SUPABASE_SERVICE_ROLE=your_supabase_service_role_key \
   -e OPENAI_API_KEY=your_openai_api_key \
   -e MISTRAL_API_KEY=your_mistral_api_key \
-  zola
+  teanai
 ```
 
 ### Option 2: Docker Compose
@@ -459,7 +459,7 @@ Create a `docker-compose.yml` file in the root of your project:
 version: "3"
 
 services:
-  zola:
+  teanai:
     build:
       context: .
       dockerfile: Dockerfile
@@ -494,7 +494,7 @@ docker-compose down
 
 ### Deploy to Vercel
 
-The easiest way to deploy Zola is using Vercel:
+The easiest way to deploy teanai is using Vercel:
 
 1. Push your code to a Git repository (GitHub, GitLab, etc.)
 2. Import the project into Vercel
@@ -523,7 +523,7 @@ npm start
 
 ## Configuration Options
 
-You can customize various aspects of Zola by modifying the configuration files:
+You can customize various aspects of teanai by modifying the configuration files:
 
 - `app/lib/config.ts`: Configure AI models, daily message limits, etc.
 - `.env.local`: Set environment variables and API keys

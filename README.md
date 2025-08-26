@@ -1,10 +1,10 @@
-# Zola
+# teanai
 
-[zola.chat](https://zola.chat)
+[teanai.chat](https://teanai.chat)
 
-**Zola** is the open-source chat interface for all your models.
+**teanai** is the open-source chat interface for all your models.
 
-![zola cover](./public/cover_zola.jpg)
+![teanai cover](./public/cover_teanai.jpg)
 
 ## Features
 
@@ -23,8 +23,8 @@
 ### Quick Setup
 
 ```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/ibelick/teanai.git
+cd teanai
 npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
 npm run dev
@@ -32,7 +32,7 @@ npm run dev
 
 
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/teanai)
 
 To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
 

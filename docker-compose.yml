@@ -1,5 +1,5 @@
 services:
-  zola:
+  teanai:
     build:
       context: .
       dockerfile: Dockerfile
