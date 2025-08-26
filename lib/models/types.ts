@@ -1,7 +1,7 @@
 import { LanguageModelV1 } from "ai"
 
 type ModelConfig = {
-  id: string // "gpt-4.1-nano" // same from AI SDKs
+  id: string // "gpt-5-nano" // same from AI SDKs
   name: string // "GPT-4.1 Nano"
   provider: string // "OpenAI", "Mistral", etc.
   providerId: string // "openai", "mistral", etc.
@@ -33,7 +33,7 @@ type ModelConfig = {
 
   icon?: string // e.g. "gpt-4", "claude", "mistral", or custom string
 
-  // apiSdk?: () => LanguageModelV1 // "openai("gpt-4.1-nano")"
+  // apiSdk?: () => LanguageModelV1 // "openai("gpt-5-nano")"
   apiSdk?: (
     apiKey?: string,
     opts?: { enableSearch?: boolean }

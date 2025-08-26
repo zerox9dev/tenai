@@ -96,6 +96,8 @@ export async function POST(req: Request) {
       messages: messages,
       tools: {} as ToolSet,
       maxSteps: 10,
+      // GPT-5-nano поддерживает только temperature=1, другие GPT-5 модели тоже лучше с 1
+      ...(model.startsWith('gpt-5') && { temperature: 1.0 }),
       onError: (err: unknown) => {
         console.error("Streaming error occurred:", err)
         // Don't set streamError anymore - let the AI SDK handle it through the stream

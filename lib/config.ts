@@ -14,13 +14,13 @@ export const REMAINING_QUERY_ALERT_THRESHOLD = 2
 export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_LIMIT_PRO_MODELS = 500
 
-export const NON_AUTH_ALLOWED_MODELS = ["gpt-4.1-nano"]
+export const NON_AUTH_ALLOWED_MODELS = ["gpt-5-nano"]
 
 export const FREE_MODELS_IDS = [
-  "gpt-4.1-nano",
+  "gpt-5-nano",
 ]
 
-export const MODEL_DEFAULT = "gpt-4.1-nano"
+export const MODEL_DEFAULT = "gpt-5-nano"
 
 export const APP_NAME = "Zola"
 export const APP_DOMAIN = "https://zola.chat"
