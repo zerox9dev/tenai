@@ -17,7 +17,27 @@ export async function GET() {
     const { data: authData } = await supabase.auth.getUser()
 
     if (!authData?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      // Anonymous users don't have keys, return empty status
+      const providerStatus = SUPPORTED_PROVIDERS.reduce(
+        (acc, provider) => {
+          acc[provider] = false
+          return acc
+        },
+        {} as Record<string, boolean>
+      )
+      return NextResponse.json(providerStatus)
+    }
+
+    // Check if user is anonymous - they shouldn't have keys
+    if (authData.user.is_anonymous) {
+      const providerStatus = SUPPORTED_PROVIDERS.reduce(
+        (acc, provider) => {
+          acc[provider] = false
+          return acc
+        },
+        {} as Record<string, boolean>
+      )
+      return NextResponse.json(providerStatus)
     }
 
     const { data, error } = await supabase

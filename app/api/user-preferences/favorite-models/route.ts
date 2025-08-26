@@ -91,7 +91,10 @@ export async function GET() {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      // Return empty array for unauthenticated users
+      return NextResponse.json({
+        favorite_models: [],
+      })
     }
 
     // Get the user's favorite models

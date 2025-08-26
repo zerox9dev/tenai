@@ -19,7 +19,15 @@ export async function GET() {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      // Return default preferences for unauthenticated users
+      return NextResponse.json({
+        layout: "fullscreen",
+        prompt_suggestions: true,
+        show_tool_invocations: true,
+        show_conversation_previews: true,
+        multi_model_enabled: false,
+        hidden_models: [],
+      })
     }
 
     // Get the user's preferences
@@ -114,7 +122,14 @@ export async function PUT(request: NextRequest) {
     }
 
     // Prepare update object with only provided fields
-    const updateData: any = {}
+    const updateData: Partial<{
+      layout: string
+      prompt_suggestions: boolean
+      show_tool_invocations: boolean
+      show_conversation_previews: boolean
+      multi_model_enabled: boolean
+      hidden_models: string[]
+    }> = {}
     if (layout !== undefined) updateData.layout = layout
     if (prompt_suggestions !== undefined)
       updateData.prompt_suggestions = prompt_suggestions
