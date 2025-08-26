@@ -10,7 +10,7 @@ teanai is a free, open-source AI chat app with multi-model support. This guide c
 - npm or yarn
 - Git
 - Supabase account (for auth and storage)
-- API keys for supported AI models (OpenAI, Mistral, etc.)
+- API keys for supported AI models (OpenAI, Anthropic, xAI, etc.)
 
 ## Environment Setup
 
@@ -25,8 +25,7 @@ SUPABASE_SERVICE_ROLE=your_supabase_service_role_key
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key
 
-# Mistral
-MISTRAL_API_KEY=your_mistral_api_key
+
 
 # OpenRouter
 OPENROUTER_API_KEY=your_openrouter_api_key
@@ -37,8 +36,7 @@ CSRF_SECRET=your_csrf_secret_key
 # Exa
 EXA_API_KEY=your_exa_api_key
 
-# Gemini
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+
 
 # Anthropic
 ANTHROPIC_API_KEY=your_anthropic_api_key
@@ -447,7 +445,7 @@ docker run -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key \
   -e SUPABASE_SERVICE_ROLE=your_supabase_service_role_key \
   -e OPENAI_API_KEY=your_openai_api_key \
-  -e MISTRAL_API_KEY=your_mistral_api_key \
+
   teanai
 ```
 
@@ -471,7 +469,7 @@ services:
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE=${SUPABASE_SERVICE_ROLE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+
     restart: unless-stopped
 ```
 
@@ -539,7 +537,7 @@ You can customize various aspects of teanai by modifying the configuration files
 
 2. **AI models not responding**
 
-   - Verify your API keys for OpenAI/Mistral
+   - Verify your API keys for OpenAI/Anthropic/xAI
    - Check that the models specified in config are available
 
 3. **Docker container exits immediately**

@@ -8,7 +8,7 @@
 
 ## Features
 
-- Multi-model support: OpenAI, Mistral, Claude, Gemini
+- Multi-model support: OpenAI, Claude, Grok
 - Bring your own API key (BYOK) support via OpenRouter
 - File uploads
 - Clean, responsive UI with light/dark themes

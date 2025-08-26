@@ -3,10 +3,10 @@ import { LanguageModelV1 } from "ai"
 type ModelConfig = {
   id: string // "gpt-5-nano" // same from AI SDKs
   name: string // "GPT-5 Nano"
-  provider: string // "OpenAI", "Mistral", etc.
-  providerId: string // "openai", "mistral", etc.
+  provider: string // "OpenAI", "Anthropic", etc.
+  providerId: string // "openai", "anthropic", etc.
   modelFamily?: string // "GPT-4", "Claude 3", etc.
-  baseProviderId: string // "gemini" // same from AI SDKs
+  baseProviderId: string // "openai" // same from AI SDKs
 
   description?: string // Short 1–2 line summary
   tags?: string[] // ["fast", "cheap", "vision", "OSS"]
@@ -31,7 +31,7 @@ type ModelConfig = {
   modelPage?: string // official product page (e.g. https://x.ai/news/grok-2)
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
 
-  icon?: string // e.g. "gpt-4", "claude", "mistral", or custom string
+  icon?: string // e.g. "gpt-4", "claude", "grok", or custom string
 
   // apiSdk?: () => LanguageModelV1 // "openai("gpt-5-nano")"
   apiSdk?: (

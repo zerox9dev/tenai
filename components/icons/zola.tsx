@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { SVGProps } from "react"
 
-export function teanaiIcon(props: SVGProps<SVGSVGElement>) {
+const ZolaIcon = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -38,3 +38,5 @@ export function teanaiIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export default ZolaIcon

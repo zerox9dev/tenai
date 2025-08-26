@@ -7,7 +7,7 @@ export function AppInfoContent() {
         <br />
         Multi-model, BYOK-ready, and fully self-hostable.
         <br />
-        Use Claude, OpenAI, Gemini, local models, and more, all in one place.
+        Use Claude, OpenAI, Grok, local models, and more, all in one place.
         <br />
       </p>
       <p className="text-foreground leading-relaxed">
